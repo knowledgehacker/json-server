@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_0.dtd">
+<Configure id="Server" class="org.eclipse.jetty.server.Server">
+    <Arg name="threadpool">
+      <New id="threadpool" class="org.eclipse.jetty.util.thread.QueuedThreadPool">
+        <Set name="minThreads" type="int">10</Set>
+        <Set name="maxThreads" type="int">200</Set>
+        <Set name="idleTimeout" type="int">60000</Set>
+        <!-- <Set name="detailedDump">false</Set> -->
+      </New>
+    </Arg>
+
+	<Set name="stopAtShutdown">true</Set>
+<!--
+  <Set name="dumpAfterStart">true</Set>
+  <Set name="dumpBeforeStop">true</Set>
+-->
+
+	<!-- 
+	  Note configuration of "httpConfig" should appear before "addConnector", 
+	  since XmlParser in Jetty doesn't support forward reference
+	-->
+ 	<New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+   	<Set name="outputBufferSize">32768</Set>
+   	<Set name="requestHeaderSize">8192</Set>
+   	<Set name="responseHeaderSize">8192</Set>
+   	<Set name="sendServerVersion">true</Set>
+   	<Set name="sendDateHeader">false</Set>
+   	<Set name="headerCacheSize">512</Set>
+
+   	<!-- Uncomment to enable handling of X-Forwarded- style headers
+   	<Call name="addCustomizer">
+     	<Arg><New class="org.eclipse.jetty.server.ForwardedRequestCustomizer"/></Arg>
+   	</Call>
+   	-->
+  </New>
+     
+  <Call name="addConnector">
+   	<Arg>
+     	<!--
+     	<New class="org.eclipse.jetty.server.nio.NetworkTrafficSelectChannelConnector">
+     	-->
+     	<New class="org.eclipse.jetty.server.ServerConnector">
+	     	<Arg name="server"><Ref refid="Server" /></Arg>
+	     	<Arg name="factories">
+	    		<Array type="org.eclipse.jetty.server.ConnectionFactory">
+	       		<Item>
+	     	 			<New class="org.eclipse.jetty.server.HttpConnectionFactory">
+	         			<Arg name="config"><Ref refid="httpConfig" /></Arg>
+	       			</New>
+	       		</Item>
+	       	</Array>
+	       </Arg>
+	       <Set name="host"><SystemProperty name="host" default="localhost"/></Set>
+	       <Set name="port"><SystemProperty name="port" default="8443"/></Set>
+	       <Set name="idleTimeout">6000</Set>
+     	</New>
+   	</Arg>
+  </Call>
+
+    <Set name="handler">
+        <New id="Handlers" class="org.eclipse.jetty.server.handler.HandlerCollection">
+        <Set name="handlers">
+          <Array type="org.eclipse.jetty.server.Handler">
+              <Item>
+                  <New class="org.eclipse.jetty.servlet.ServletContextHandler">
+                      <Set name="resourceBase">./src/main/webapp/</Set> <!-- base directory to find the static resource -->
+                      <Set name="contextPath">/</Set>	<!-- path after "http://host:port", ex context path "/context_path" refers to "http://host:port/context_path" -->
+		      <Set name="welcomeFiles">	<!-- the file to display when request to "http://host:port" by default -->
+		  	<Array type="String"><Item>index.jsp</Item></Array>
+		      </Set>
+		      <!-- Since we only need to serve requests to static content, we use DefaultServlet here -->
+                      <Call name="addServlet">
+                          <Arg name="servlet">org.eclipse.jetty.servlet.DefaultServlet</Arg>
+                          <Arg name="pathSepc">/</Arg>
+                      </Call>
+              </New>
+          </Item>
+        </Array>
+      </Set>
+    </New>
+  </Set>
+</Configure>  

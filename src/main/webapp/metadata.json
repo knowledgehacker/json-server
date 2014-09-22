@@ -1,0 +1,18 @@
+{
+    "example": [
+        {
+            "name": "requests",
+            "columns": [
+                {
+                    "name": "transaction_id",
+                    "type": "VARCHAR"
+                },
+                {
+                    "name": "key_value",
+                    "type": "VARCHAR"
+                }
+            ],
+            "sources": [ "request-data.csv" ]
+        }
+    ]
+}
